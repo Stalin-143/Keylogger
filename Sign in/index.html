@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Keylogger Sign In</title>
+  <title>Secure Sign In</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
                   <div class="center-wrap">
                     <div class="section text-center">
                       <h4 class="mb-4 pb-3">Log In</h4>
-                      <form id="login-form" method="POST" action="/login" onsubmit="return validateLogin()">
+                      <form id="login-form" onsubmit="return validateLogin(event)">
                         <div class="form-group">
                           <input type="text" name="username" class="form-style" placeholder="Your Username"
                             id="logusername" autocomplete="off" required>
@@ -56,12 +56,12 @@
                       </div>
                       <div class="form-group mt-2">
                         <input type="text" id="logusername-signup" class="form-style" placeholder="Choose Username"
-                          autocomplete="off">
+                          autocomplete="off" required>
                         <i class="input-icon uil uil-user"></i>
                       </div>
                       <div class="form-group mt-2">
                         <input type="password" id="logpass-signup" class="form-style" placeholder="Choose Password"
-                          autocomplete="off">
+                          autocomplete="off" required>
                         <i class="input-icon uil uil-lock-alt"></i>
                       </div>
                       <a href="#" class="btn mt-4" onclick="saveAndRedirect()">Submit</a>
@@ -75,33 +75,50 @@
       </div>
     </div>
   </div>
-
   <script>
-    function saveAndRedirect() {
-      const username = document.getElementById('logusername-signup').value;
+    async function hashPassword(password) {
+      const msgBuffer = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function saveAndRedirect() {
+      const username = document.getElementById('logusername-signup').value.trim();
       const password = document.getElementById('logpass-signup').value;
-      if (username && password) {
-        localStorage.setItem('userUsername', username);
-        localStorage.setItem('userPass', password);
-        document.getElementById('reg-log').checked = false;
-        document.getElementById('logusername').value = username;
-        document.getElementById('logpass').value = password;
+      if (!username || !password) {
+        alert("Username and password required!");
+        return;
+      }
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      if (users.some(u => u.username === username)) {
+        alert("Username already exists. Choose another.");
+        return;
+      }
+      const hashedPass = await hashPassword(password);
+      users.push({ username, password: hashedPass });
+      localStorage.setItem("users", JSON.stringify(users));
+      document.getElementById('reg-log').checked = false;
+      document.getElementById('logusername').value = username;
+      document.getElementById('logpass').value = "";
+    }
+    async function validateLogin(event) {
+      event.preventDefault();
+      const enteredUser = document.getElementById('logusername').value.trim();
+      const enteredPass = document.getElementById('logpass').value;
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      const hashedPass = await hashPassword(enteredPass);
+      const user = users.find(u => u.username === enteredUser && u.password === hashedPass);
+      if (user) {
+        alert("Login successful!");
+        return true;
+      } else {
+        alert("Invalid username or password!");
+        return false;
       }
     }
     function checkLocalStorage() {
-      const username = localStorage.getItem('userUsername');
-      const password = localStorage.getItem('userPass');
-    }
-    function validateLogin() {
-      const savedUser = localStorage.getItem('userUsername');
-      const savedPass = localStorage.getItem('userPass');
-      const enteredUser = document.getElementById('logusername').value;
-      const enteredPass = document.getElementById('logpass').value;
-      if (enteredUser === savedUser && enteredPass === savedPass) {
-        return true;
-      } else {
-        return false;
-      }
+      console.log(JSON.parse(localStorage.getItem("users")));
+      alert("Check console for stored users.");
     }
   </script>
 </body>
