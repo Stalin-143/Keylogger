@@ -3,23 +3,15 @@ from pynput.keyboard import Listener, Key
 import os
 import requests
 import time
+import pyfiglet
+
+# Use pyfiglet for CLI art as requested
+ascii_banner = pyfiglet.figlet_format("KEY LOGGER")
+print(ascii_banner)
 
 print(r"""
-              _  __            _                                
-             | |/ /___ _   _  | |    ___   __ _  __ _  ___ _ __ 
-             | ' // _ \ | | | | |   / _ \ / _` |/ _` |/ _ \ '__|
-             | . \  __/ |_| | | |__| (_) | (_| | (_| |  __/ |   
-             |_|\_\___|\__, | |_____\___/ \__, |\__, |\___|_|   
-                       |___/              |___/ |___/           
-                                                         0.1  
-
-
-
-
 GitHub:https://github.com/Stalin-143
 """)
-
-
 
 # Ask user for the desired log file location
 log_location = input("Please enter the full path for the log file (e.g., /path/to/logfile.txt): ")

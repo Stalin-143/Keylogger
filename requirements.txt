@@ -1,3 +1,4 @@
 pynput==1.7.6
 Flask==2.2.5
 requests==2.32.4
+pyfiglet
