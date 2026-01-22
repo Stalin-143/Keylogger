@@ -7,6 +7,7 @@ For educational purposes only.
 import os
 import sys
 import json
+import secrets
 import argparse
 from functools import wraps
 from flask import Flask, render_template_string, send_file, request, Response
@@ -25,6 +26,9 @@ Github: https://github.com/Stalin-143
 
 app = Flask(__name__)
 
+# Set a secure secret key for session management
+app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
+
 # Global configuration
 CONFIG = {
     'log_file_path': 'logs/keylog.txt',
@@ -35,7 +39,7 @@ CONFIG = {
 
 def check_auth(username, password):
     """
-    Check if username and password are valid.
+    Check if username and password are valid using secure comparison.
 
     Args:
         username (str): Username to check
@@ -44,7 +48,10 @@ def check_auth(username, password):
     Returns:
         bool: True if valid, False otherwise
     """
-    return username == CONFIG['username'] and password == CONFIG['password']
+    # Use secrets.compare_digest for constant-time comparison to prevent timing attacks
+    username_match = secrets.compare_digest(username, CONFIG['username'])
+    password_match = secrets.compare_digest(password, CONFIG['password'])
+    return username_match and password_match
 
 
 def authenticate():
@@ -153,8 +160,19 @@ def home():
     
     if os.path.exists(log_file_path):
         try:
-            with open(log_file_path, 'r') as file:
-                log_contents = file.read()
+            # Read file with size limit to prevent memory exhaustion
+            MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
+            file_size = os.path.getsize(log_file_path)
+            
+            if file_size > MAX_FILE_SIZE:
+                # For large files, read only the last portion
+                with open(log_file_path, 'r') as file:
+                    file.seek(max(0, file_size - MAX_FILE_SIZE))
+                    log_contents = file.read()
+                    log_contents = f"[Showing last {MAX_FILE_SIZE/1024/1024:.1f}MB of {file_size/1024/1024:.1f}MB file]\n\n" + log_contents
+            else:
+                with open(log_file_path, 'r') as file:
+                    log_contents = file.read()
         except Exception as e:
             log_contents = f"Error reading log file: {e}"
     else:
@@ -276,12 +294,24 @@ def main():
     # Update global config
     CONFIG['log_file_path'] = args.log_file or server_config.get('log_file_path', 'logs/keylog.txt')
     
-    # Load credentials from environment variables or config
-    CONFIG['username'] = os.getenv('WEB_SERVER_USERNAME', 'admin')
-    CONFIG['password'] = os.getenv('WEB_SERVER_PASSWORD', 'admin')
+    # Load credentials from environment variables
+    CONFIG['username'] = os.getenv('WEB_SERVER_USERNAME')
+    CONFIG['password'] = os.getenv('WEB_SERVER_PASSWORD')
     
-    if CONFIG['password'] == 'admin':
-        print("⚠️  WARNING: Using default password. Please set WEB_SERVER_PASSWORD environment variable.")
+    # Validate that credentials are set
+    if not CONFIG['username'] or not CONFIG['password']:
+        print("ERROR: Authentication credentials not set!")
+        print("Please set WEB_SERVER_USERNAME and WEB_SERVER_PASSWORD environment variables.")
+        print("Example:")
+        print("  export WEB_SERVER_USERNAME=admin")
+        print("  export WEB_SERVER_PASSWORD=your_secure_password")
+        print("\nOr source your .env file:")
+        print("  source config/.env")
+        sys.exit(1)
+    
+    if CONFIG['password'] == 'admin' or len(CONFIG['password']) < 8:
+        print("⚠️  WARNING: Weak password detected!")
+        print("   Please use a strong password (at least 8 characters).")
     
     # Get server settings
     host = args.host or server_config.get('host', '0.0.0.0')
