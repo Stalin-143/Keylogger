@@ -39,15 +39,6 @@ Thank you to everyone who has contributed to this project! 🎉
 - Web server implementation
 - Documentation and security guidelines
 
-## Contributors
-
-### Always-Amulya7
-- **GitHub**: [@Always-Amulya7](https://github.com/Always-Amulya7)
-- **Profile**: [https://github.com/Always-Amulya7](https://github.com/Always-Amulya7)
-- **Contributions**: 
-  - Submitted PR #16 with sign-in/login page implementation
-  - Suggested improvements to CLI interface
-  - Participated in project discussions
 
 ## How to Contribute
 
