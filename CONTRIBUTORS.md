@@ -25,7 +25,7 @@ Thank you to everyone who has contributed to this project! 🎉
         <a href="https://github.com/HARSHITHA-SREE">
             <img src="https://avatars.githubusercontent.com/u/185629164?v=4" width="100;" alt="HARSHITHA-SREE"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>HARSHITHA-SREE</b></sub>
         </a>
     </td></tr>
 </table>
