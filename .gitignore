@@ -70,7 +70,8 @@ Thumbs.db
 
 # Log files
 *.log
-logs/
+logs/*
+!logs/.gitkeep
 
 # ngrok
 ngrok
