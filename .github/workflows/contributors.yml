@@ -17,7 +17,7 @@ permissions:
 jobs:
   add-contributors:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true)
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
