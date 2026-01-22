@@ -1,0 +1,39 @@
+{
+  "projectName": "Keylogger",
+  "projectOwner": "Stalin-143",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "CONTRIBUTORS.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "Stalin-143",
+      "name": "Stalin-143",
+      "avatar_url": "https://avatars.githubusercontent.com/u/161853795?v=4",
+      "profile": "https://github.com/Stalin-143",
+      "contributions": [
+        "code",
+        "doc",
+        "infra",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "Always-Amulya7",
+      "name": "Always-Amulya7",
+      "avatar_url": "https://avatars.githubusercontent.com/Always-Amulya7",
+      "profile": "https://github.com/Always-Amulya7",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#contributors)"
+}

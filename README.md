@@ -138,7 +138,10 @@ This project is intended for **educational purposes** only. Unauthorized use of 
 - Related Articles on Ethical Hacking and Cybersecurity
 
 ## Contributions
+
 Contributions are welcome! Please make sure to follow ethical guidelines and legal standards when contributing to this project.
+
+See our [Contributors Hall of Fame](CONTRIBUTORS.md) to view all the amazing people who have contributed to this project! ✨
 
 ## 📜 License
 
