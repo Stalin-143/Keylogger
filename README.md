@@ -1,5 +1,7 @@
 # Keylogger :)
 
+[![Contributors](https://img.shields.io/github/contributors/Stalin-143/Keylogger?style=for-the-badge)](https://github.com/Stalin-143/Keylogger/graphs/contributors)
+
 
 ![WhatsApp Image 2024-11-29 at 11 35 30 PM](https://github.com/user-attachments/assets/689d466c-26d5-4830-8dba-48693ea04d01) 
 
@@ -138,7 +140,10 @@ This project is intended for **educational purposes** only. Unauthorized use of 
 - Related Articles on Ethical Hacking and Cybersecurity
 
 ## Contributions
+
 Contributions are welcome! Please make sure to follow ethical guidelines and legal standards when contributing to this project.
+
+See our [Contributors Hall of Fame](CONTRIBUTORS.md) to view all the amazing people who have contributed to this project! ✨
 
 ## 📜 License
 

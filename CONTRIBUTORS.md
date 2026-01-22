@@ -1,6 +1,11 @@
-# 👥 Contributors
+# 👥 Contributors Hall of Fame
 
-Thank you to everyone who has contributed to this project!
+Thank you to everyone who has contributed to this project! 🎉
+
+## 🏆 Contributors Gallery
+
+<!-- readme: collaborators,contributors -start -->
+<!-- readme: collaborators,contributors -end -->
 
 ## Project Maintainer
 
