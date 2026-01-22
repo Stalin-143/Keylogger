@@ -24,6 +24,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main  # Always checkout main branch for security
 
       - name: Update contributors
         uses: akhilmhdh/contributors-readme-action@v2.3.6
