@@ -100,7 +100,7 @@ animate_echo "Stay responsible and avoid using keyloggers for unauthorized surve
 echo
 
 # Legal Disclaimer
-animate_echo "Legal Disclaimer"
+animate_echo "Legal Disclaimer!"
 animate_echo "-----------------"
 animate_echo "This project is meant for educational purposes only."
 animate_echo "Unauthorized use of keyloggers for malicious activities such as spying, data theft, and hacking is illegal."
