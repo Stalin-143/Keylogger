@@ -5,6 +5,30 @@ Thank you to everyone who has contributed to this project! 🎉
 ## 🏆 Contributors Gallery
 
 <!-- readme: collaborators,contributors -start -->
+<table>
+<tr>
+    <td align="center">
+        <a href="https://github.com/Stalin-143">
+            <img src="https://avatars.githubusercontent.com/u/161853795?v=4" width="100;" alt="Stalin-143"/>
+            <br />
+            <sub><b>Stalin</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Always-Amulya7">
+            <img src="https://avatars.githubusercontent.com/u/149600311?v=4" width="100;" alt="Always-Amulya7"/>
+            <br />
+            <sub><b>Amulya Shrivastava</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/HARSHITHA-SREE">
+            <img src="https://avatars.githubusercontent.com/u/185629164?v=4" width="100;" alt="HARSHITHA-SREE"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td></tr>
+</table>
 <!-- readme: collaborators,contributors -end -->
 
 ## Project Maintainer
