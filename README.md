@@ -1,5 +1,7 @@
 # Keylogger :)
 
+[![Contributors](https://img.shields.io/github/contributors/Stalin-143/Keylogger?style=for-the-badge)](https://github.com/Stalin-143/Keylogger/graphs/contributors)
+
 
 ![WhatsApp Image 2024-11-29 at 11 35 30 PM](https://github.com/user-attachments/assets/689d466c-26d5-4830-8dba-48693ea04d01) 
 
