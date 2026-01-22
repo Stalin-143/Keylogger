@@ -70,7 +70,15 @@ Thumbs.db
 
 # Log files
 *.log
+logs/*
+!logs/.gitkeep
 
 # ngrok
 ngrok
 ngrok.exe
+ngrok-*.zip
+ngrok-*.tgz
+
+# Configuration files with sensitive data
+config/config.json
+config/.env
