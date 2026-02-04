@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keylogger-educational"
+version = "1.0.0"
+description = "Educational keylogger project for cybersecurity learning"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.7"
+authors = [
+    {name = "Stalin-143"}
+]
+keywords = ["keylogger", "educational", "cybersecurity", "security"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Education",
+    "Topic :: Security",
+]
+dependencies = [
+    "pynput>=1.7.6",
+    "Flask>=2.2.5",
+    "requests>=2.32.4",
+    "python-dotenv>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Stalin-143/Keylogger"
+Repository = "https://github.com/Stalin-143/Keylogger"
+Issues = "https://github.com/Stalin-143/Keylogger/issues"
+
+[project.scripts]
+keylogger = "src.keylogger:main"
+keylogger-server = "src.server:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "config*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.example"]

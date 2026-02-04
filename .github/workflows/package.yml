@@ -1,0 +1,127 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-python-package:
+    name: Build Python Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build wheel
+
+      - name: Build package
+        run: python -m build
+
+      - name: Upload Python package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+          retention-days: 30
+
+  build-executables:
+    name: Build Executables
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: keylogger-linux
+            executable_ext: ""
+          - os: windows-latest
+            artifact_name: keylogger-windows
+            executable_ext: ".exe"
+          - os: macos-latest
+            artifact_name: keylogger-macos
+            executable_ext: ""
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build keylogger executable
+        run: |
+          pyinstaller --onefile --name keylogger src/keylogger.py
+
+      - name: Build server executable
+        run: |
+          pyinstaller --onefile --name keylogger-server src/server.py
+
+      - name: Create distribution package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p package
+          cp dist/keylogger package/
+          cp dist/keylogger-server package/
+          cp -r config package/
+          cp README.md package/
+          cp LICENSE package/
+          cp DISCLAIMER.md package/
+          cp SECURITY.md package/
+          tar -czvf ${{ matrix.artifact_name }}.tar.gz -C package .
+
+      - name: Create distribution package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path package
+          Copy-Item dist/keylogger.exe package/
+          Copy-Item dist/keylogger-server.exe package/
+          Copy-Item -Recurse config package/
+          Copy-Item README.md package/
+          Copy-Item LICENSE package/
+          Copy-Item DISCLAIMER.md package/
+          Copy-Item SECURITY.md package/
+          Compress-Archive -Path package/* -DestinationPath ${{ matrix.artifact_name }}.zip
+
+      - name: Upload executable artifacts (Unix)
+        if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.tar.gz
+          retention-days: 30
+
+      - name: Upload executable artifacts (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.zip
+          retention-days: 30
