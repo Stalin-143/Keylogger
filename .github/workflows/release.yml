@@ -179,8 +179,8 @@ jobs:
             - 🍎 **macOS**: `keylogger-macos.tar.gz`
             
             **Python Package:**
-            - `keylogger_educational-*.whl` - Install with `pip install <filename>`
-            - `keylogger_educational-*.tar.gz` - Source distribution
+            - `keylogger_educational-<version>-py3-none-any.whl` - Install with `pip install <filename>`
+            - `keylogger_educational-<version>.tar.gz` - Source distribution
             
             ### 🚀 Quick Start
             
