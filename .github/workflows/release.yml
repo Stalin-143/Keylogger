@@ -1,0 +1,74 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Error: Version must follow semantic versioning (e.g., v1.0.0 or v1.0.0-beta.1)"
+            exit 1
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          body: |
+            ## Keylogger ${{ inputs.version }}
+            
+            ### 📦 What's Included
+            - Main keylogger script (`src/keylogger.py`)
+            - Web server for viewing logs (`src/server.py`)
+            - Configuration templates
+            - Setup script for easy installation
+            
+            ### 🚀 Quick Start
+            1. Clone or download this release
+            2. Run `./setup.sh` to install dependencies
+            3. Configure `config/config.json` and `config/.env`
+            4. Start the server: `python3 src/server.py`
+            5. Run the keylogger: `python3 src/keylogger.py`
+            
+            ### ⚠️ Important Legal Disclaimer
+            **This project is for EDUCATIONAL PURPOSES ONLY.**
+            
+            - Unauthorized use of keyloggers is **illegal** and may result in criminal prosecution
+            - Always obtain **explicit informed consent** before deploying any monitoring software
+            - Users are responsible for complying with all applicable local and international laws
+            - See [DISCLAIMER.md](https://github.com/Stalin-143/Keylogger/blob/main/DISCLAIMER.md) for full legal information
+            
+            See [README.md](https://github.com/Stalin-143/Keylogger/blob/main/README.md) for full documentation.
+          draft: false
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
