@@ -242,6 +242,24 @@ Contributions are welcome! Please make sure to follow ethical guidelines and leg
 
 See our [Contributors Hall of Fame](CONTRIBUTORS.md) to view all the amazing people who have contributed to this project! ✨
 
+### Creating Releases
+
+Releases can be created in two ways:
+
+1. **Using Git tags** (recommended):
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+   This automatically triggers the release workflow.
+
+2. **Manual workflow dispatch**:
+   - Go to Actions → Create Release
+   - Click "Run workflow"
+   - Enter the version (e.g., `v1.0.0`)
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
 ## 📜 License
 
 This project is licensed under the [License](LICENSE)

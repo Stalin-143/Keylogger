@@ -1,6 +1,10 @@
 name: Create Release
 
 on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
   workflow_dispatch:
     inputs:
       version:
@@ -26,13 +30,30 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Determine if it's a prerelease (contains hyphen after version number)
+          if [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-.+ ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=${{ inputs.prerelease || 'false' }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Validate version format
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+          VERSION="${{ steps.get_version.outputs.version }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
             echo "Error: Version must follow semantic versioning (e.g., v1.0.0 or v1.0.0-beta.1)"
             exit 1
           fi
@@ -40,10 +61,10 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.version }}
-          name: Release ${{ inputs.version }}
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
           body: |
-            ## Keylogger ${{ inputs.version }}
+            ## Keylogger ${{ steps.get_version.outputs.version }}
             
             ### 📦 What's Included
             - Main keylogger script (`src/keylogger.py`)
@@ -68,7 +89,7 @@ jobs:
             
             See [README.md](https://github.com/Stalin-143/Keylogger/blob/main/README.md) for full documentation.
           draft: false
-          prerelease: ${{ inputs.prerelease }}
+          prerelease: ${{ steps.get_version.outputs.prerelease }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
