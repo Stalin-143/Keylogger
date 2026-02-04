@@ -21,18 +21,115 @@ permissions:
   contents: write
 
 jobs:
+  build-packages:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build wheel
+
+      - name: Build Python package
+        run: python -m build
+
+      - name: Upload Python package
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+          retention-days: 1
+
+  build-executables:
+    name: Build Executables (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: keylogger-linux
+          - os: windows-latest
+            artifact_name: keylogger-windows
+          - os: macos-latest
+            artifact_name: keylogger-macos
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build keylogger executable
+        run: pyinstaller --onefile --name keylogger src/keylogger.py
+
+      - name: Build server executable
+        run: pyinstaller --onefile --name keylogger-server src/server.py
+
+      - name: Create distribution package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p package
+          cp dist/keylogger package/
+          cp dist/keylogger-server package/
+          cp -r config package/
+          cp README.md LICENSE DISCLAIMER.md SECURITY.md package/
+          tar -czvf ${{ matrix.artifact_name }}.tar.gz -C package .
+
+      - name: Create distribution package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path package
+          Copy-Item dist/keylogger.exe package/
+          Copy-Item dist/keylogger-server.exe package/
+          Copy-Item -Recurse config package/
+          Copy-Item README.md, LICENSE, DISCLAIMER.md, SECURITY.md package/
+          Compress-Archive -Path package/* -DestinationPath ${{ matrix.artifact_name }}.zip
+
+      - name: Upload executable artifact (Unix)
+        if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.tar.gz
+          retention-days: 1
+
+      - name: Upload executable artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.zip
+          retention-days: 1
+
   release:
+    name: Create Release
+    needs: [build-packages, build-executables]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
 
       - name: Get version
         id: get_version
@@ -58,6 +155,14 @@ jobs:
             exit 1
           fi
 
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -66,13 +171,31 @@ jobs:
           body: |
             ## Keylogger ${{ steps.get_version.outputs.version }}
             
-            ### 📦 What's Included
-            - Main keylogger script (`src/keylogger.py`)
-            - Web server for viewing logs (`src/server.py`)
-            - Configuration templates
-            - Setup script for easy installation
+            ### 📦 Downloads
+            
+            **Pre-built Executables:**
+            - 🐧 **Linux**: `keylogger-linux.tar.gz`
+            - 🪟 **Windows**: `keylogger-windows.zip`
+            - 🍎 **macOS**: `keylogger-macos.tar.gz`
+            
+            **Python Package:**
+            - `keylogger_educational-<version>-py3-none-any.whl` - Install with `pip install <filename>`
+            - `keylogger_educational-<version>.tar.gz` - Source distribution
             
             ### 🚀 Quick Start
+            
+            **Using pre-built executables:**
+            1. Download the package for your operating system
+            2. Extract the archive
+            3. Configure `config/config.json` and `config/.env`
+            4. Run `./keylogger-server` to start the web server
+            5. Run `./keylogger` to start the keylogger
+            
+            **Using Python package:**
+            1. `pip install keylogger_educational-*.whl`
+            2. Run `keylogger-server` and `keylogger` commands
+            
+            **From source:**
             1. Clone or download this release
             2. Run `./setup.sh` to install dependencies
             3. Configure `config/config.json` and `config/.env`
@@ -88,6 +211,11 @@ jobs:
             - See [DISCLAIMER.md](https://github.com/Stalin-143/Keylogger/blob/main/DISCLAIMER.md) for full legal information
             
             See [README.md](https://github.com/Stalin-143/Keylogger/blob/main/README.md) for full documentation.
+          files: |
+            artifacts/python-package/*
+            artifacts/keylogger-linux/*
+            artifacts/keylogger-windows/*
+            artifacts/keylogger-macos/*
           draft: false
           prerelease: ${{ steps.get_version.outputs.prerelease }}
           generate_release_notes: true
