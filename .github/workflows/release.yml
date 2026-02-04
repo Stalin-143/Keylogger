@@ -139,6 +139,8 @@ jobs:
           else
             VERSION="${{ inputs.version }}"
           fi
+          # Trim leading and trailing whitespace
+          VERSION=$(echo "$VERSION" | xargs)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           # Determine if it's a prerelease (contains hyphen after version number)
           if [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-.+ ]]; then
