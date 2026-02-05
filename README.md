@@ -23,6 +23,8 @@ Welcome to the **Keylogger Project**! This project demonstrates how a keylogger 
 ├── /logs                   # Log files directory (created automatically)
 ├── /docs                   # Documentation
 │   └── manual.sh           # Educational information script
+├── /scripts                # Utility scripts
+│   └── create-release.sh   # Script to create releases
 ├── /github                 # GitHub workflows and configs
 ├── setup.sh                # Setup script
 ├── requirements.txt        # Python dependencies
@@ -244,16 +246,24 @@ See our [Contributors Hall of Fame](CONTRIBUTORS.md) to view all the amazing peo
 
 ### Creating Releases
 
-Releases can be created in two ways:
+Releases can be created in three ways:
 
-1. **Using Git tags** (recommended):
+1. **Using the release script** (recommended):
    ```bash
-   git tag v1.0.0
+   ./scripts/create-release.sh
+   # Or with a specific version:
+   ./scripts/create-release.sh v1.0.0
+   ```
+   This interactive script validates the version, creates a tag, and pushes it.
+
+2. **Using Git tags**:
+   ```bash
+   git tag -a v1.0.0 -m "Release v1.0.0"
    git push origin v1.0.0
    ```
    This automatically triggers the release workflow.
 
-2. **Manual workflow dispatch**:
+3. **Manual workflow dispatch**:
    - Go to Actions → Create Release
    - Click "Run workflow"
    - Enter the version (e.g., `v1.0.0`)
