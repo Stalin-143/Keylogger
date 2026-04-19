@@ -38,6 +38,8 @@ CONFIG = {
     'api_key': None
 }
 MAX_LOG_PAYLOAD_BYTES = 64 * 1024
+MIN_PASSWORD_LENGTH = 12
+MIN_API_KEY_LENGTH = 24
 MIN_API_KEY_UNIQUE_CHARS = 8
 
 
@@ -128,6 +130,8 @@ def has_sufficient_key_entropy(value):
     Returns:
         bool: True when key has enough character variety
     """
+    if not value:
+        return False
     if len(set(value)) < MIN_API_KEY_UNIQUE_CHARS:
         return False
     if value.count(value[0]) == len(value):
@@ -373,21 +377,24 @@ def main():
         print("ERROR: Default password 'admin' is not allowed.")
         sys.exit(1)
 
-    if len(CONFIG['password']) < 12 or not is_strong_password(CONFIG['password']):
+    if len(CONFIG['password']) < MIN_PASSWORD_LENGTH or not is_strong_password(CONFIG['password']):
         print("ERROR: Weak password detected.")
-        print("Please use at least 12 characters with uppercase, lowercase, number, and special character.")
+        print(
+            f"Please use at least {MIN_PASSWORD_LENGTH} characters with uppercase, lowercase, "
+            "number, and special character."
+        )
         sys.exit(1)
 
     if not CONFIG['api_key']:
         print("ERROR: LOG_INGEST_API_KEY is required.")
         sys.exit(1)
 
-    if len(CONFIG['api_key']) < 24:
-        print("ERROR: LOG_INGEST_API_KEY must be at least 24 characters.")
+    if len(CONFIG['api_key']) < MIN_API_KEY_LENGTH:
+        print(f"ERROR: LOG_INGEST_API_KEY must be at least {MIN_API_KEY_LENGTH} characters.")
         sys.exit(1)
 
     if not has_sufficient_key_entropy(CONFIG['api_key']):
-        print(f"ERROR: LOG_INGEST_API_KEY must include at least {MIN_API_KEY_UNIQUE_CHARS} unique characters.")
+        print(f"ERROR: Ingestion API key must include at least {MIN_API_KEY_UNIQUE_CHARS} unique characters.")
         sys.exit(1)
     
     # Get server settings
