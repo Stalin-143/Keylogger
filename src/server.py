@@ -33,8 +33,10 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
 CONFIG = {
     'log_file_path': 'logs/keylog.txt',
     'username': 'admin',
-    'password': 'admin'
+    'password': 'admin',
+    'api_key': None
 }
+MAX_LOG_PAYLOAD_BYTES = 64 * 1024
 
 
 def check_auth(username, password):
@@ -80,6 +82,21 @@ def requires_auth(f):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
+
+
+def has_valid_api_key():
+    """
+    Validate API key for log ingestion endpoint.
+
+    Returns:
+        bool: True when API key is configured and valid
+    """
+    configured_api_key = CONFIG.get('api_key')
+    request_api_key = request.headers.get('X-API-Key')
+
+    if not configured_api_key or not request_api_key:
+        return False
+    return secrets.compare_digest(request_api_key, configured_api_key)
 
 
 # HTML template to display the log contents and provide a download link
@@ -210,8 +227,17 @@ def receive_log():
         Success or error message
     """
     try:
+        if not has_valid_api_key():
+            return "Unauthorized", 401
+
+        if request.content_length and request.content_length > MAX_LOG_PAYLOAD_BYTES:
+            return "Log payload too large", 413
+
         log_data = request.form.get('log', '')
         if log_data:
+            if len(log_data.encode('utf-8')) > MAX_LOG_PAYLOAD_BYTES:
+                return "Log payload too large", 413
+
             log_file_path = CONFIG['log_file_path']
             
             # Ensure log directory exists
@@ -220,7 +246,7 @@ def receive_log():
                 os.makedirs(log_dir, exist_ok=True)
             
             # Append log data to file
-            with open(log_file_path, 'a') as f:
+            with open(log_file_path, 'a', encoding='utf-8') as f:
                 f.write(log_data)
             
             return "Log received successfully", 200
@@ -297,6 +323,7 @@ def main():
     # Load credentials from environment variables
     CONFIG['username'] = os.getenv('WEB_SERVER_USERNAME')
     CONFIG['password'] = os.getenv('WEB_SERVER_PASSWORD')
+    CONFIG['api_key'] = os.getenv('LOG_INGEST_API_KEY')
     
     # Validate that credentials are set
     if not CONFIG['username'] or not CONFIG['password']:
@@ -308,15 +335,25 @@ def main():
         print("\nOr source your .env file:")
         print("  source config/.env")
         sys.exit(1)
-    
-    if CONFIG['password'] == 'admin' or len(CONFIG['password']) < 8:
-        print("⚠️  WARNING: Weak password detected!")
-        print("   Please use a strong password (at least 8 characters).")
+
+    if CONFIG['password'] == 'admin' or len(CONFIG['password']) < 12:
+        print("ERROR: Weak password detected.")
+        print("Please use a strong password (at least 12 characters).")
+        sys.exit(1)
+
+    if not CONFIG['api_key'] or len(CONFIG['api_key']) < 24:
+        print("ERROR: LOG_INGEST_API_KEY is required and must be at least 24 characters.")
+        sys.exit(1)
     
     # Get server settings
     host = args.host or server_config.get('host', '0.0.0.0')
     port = args.port or server_config.get('port', 5000)
     debug = args.debug or server_config.get('debug', False)
+
+    if debug and host not in ('127.0.0.1', 'localhost', '::1'):
+        print("ERROR: Debug mode is only allowed on localhost interfaces.")
+        print("Use a local host binding or disable --debug.")
+        sys.exit(1)
 
     print(f"\nStarting web server on {host}:{port}")
     print(f"Log file path: {CONFIG['log_file_path']}")

@@ -85,9 +85,10 @@ Welcome to the **Keylogger Project**! This project demonstrates how a keylogger 
    
    Edit `config/.env`:
    ```bash
-   WEB_SERVER_USERNAME=admin
-   WEB_SERVER_PASSWORD=your_secure_password_here
+   WEB_SERVER_USERNAME=admin_user
+   WEB_SERVER_PASSWORD=your_very_strong_password_here
    FLASK_DEBUG=False
+   LOG_INGEST_API_KEY=replace_with_random_long_api_key
    ```
 
 ### Usage

