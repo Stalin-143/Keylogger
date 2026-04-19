@@ -227,8 +227,12 @@ def main():
         print("Please set server_url in config/config.json or use --server-url argument.")
         sys.exit(1)
 
-    if not api_key or len(api_key) < 24:
-        print("Error: LOG_INGEST_API_KEY environment variable is required and must be at least 24 characters.")
+    if not api_key:
+        print("Error: LOG_INGEST_API_KEY environment variable is required.")
+        sys.exit(1)
+
+    if len(api_key) < 24:
+        print("Error: LOG_INGEST_API_KEY must be at least 24 characters.")
         sys.exit(1)
     
     if args.no_verify_ssl:

@@ -230,9 +230,6 @@ def receive_log():
         if not has_valid_api_key():
             return "Unauthorized", 401
 
-        if request.content_length and request.content_length > MAX_LOG_PAYLOAD_BYTES:
-            return "Log payload too large", 413
-
         log_data = request.form.get('log', '')
         if log_data:
             if len(log_data.encode('utf-8')) > MAX_LOG_PAYLOAD_BYTES:
