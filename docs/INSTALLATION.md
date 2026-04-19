@@ -103,14 +103,15 @@ mkdir -p logs
 
 ```bash
 # Web Server Authentication
-WEB_SERVER_USERNAME=admin
-WEB_SERVER_PASSWORD=your_secure_password_here
+WEB_SERVER_USERNAME=admin_user
+WEB_SERVER_PASSWORD=your_very_strong_password_here
 
 # Flask Configuration
 FLASK_DEBUG=False
+LOG_INGEST_API_KEY=replace_with_random_long_api_key
 ```
 
-**Important:** Change the default password to a secure one!
+**Important:** Use a strong password (minimum 12 characters) and an API key of at least 24 characters.
 
 ### 3. Set Environment Variables (Before Running)
 
@@ -144,7 +145,7 @@ python3 src/server.py --config config/config.json
 
 **With command-line options:**
 ```bash
-python3 src/server.py --port 8080 --debug
+python3 src/server.py --host 127.0.0.1 --port 8080 --debug
 ```
 
 **All options:**
@@ -152,7 +153,7 @@ python3 src/server.py --port 8080 --debug
 - `--log-file PATH`: Override log file path
 - `--host HOST`: Host to bind to (default: 0.0.0.0)
 - `--port PORT`: Port to bind to (default: 5000)
-- `--debug`: Enable debug mode
+- `--debug`: Enable debug mode (localhost bindings only)
 
 ### Exposing Server with ngrok (Optional)
 

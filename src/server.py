@@ -9,6 +9,7 @@ import sys
 import json
 import secrets
 import argparse
+import string
 from functools import wraps
 from flask import Flask, render_template_string, send_file, request, Response
 
@@ -24,17 +25,22 @@ BANNER = r"""
 Github: https://github.com/Stalin-143
 """
 
-app = Flask(__name__)
-
-# Set a secure secret key for session management
-app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
-
-# Global configuration
 CONFIG = {
     'log_file_path': 'logs/keylog.txt',
     'username': 'admin',
-    'password': 'admin'
+    'password': 'admin',
+    'api_key': None
 }
+MAX_LOG_PAYLOAD_BYTES = 64 * 1024
+MIN_PASSWORD_LENGTH = 12
+MIN_API_KEY_LENGTH = 24
+MIN_API_KEY_UNIQUE_CHARS = 8
+
+app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = MAX_LOG_PAYLOAD_BYTES
+
+# Set a secure secret key for session management
+app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
 
 
 def check_auth(username, password):
@@ -80,6 +86,62 @@ def requires_auth(f):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
+
+
+def has_valid_api_key():
+    """
+    Validate API key for log ingestion endpoint.
+
+    Returns:
+        bool: True when API key is configured and valid
+    """
+    configured_api_key = CONFIG.get('api_key')
+    request_api_key = request.headers.get('X-API-Key')
+
+    if not configured_api_key or not request_api_key:
+        return False
+    return secrets.compare_digest(request_api_key, configured_api_key)
+
+
+def is_strong_password(password):
+    """
+    Validate password complexity requirements.
+
+    Args:
+        password (str): Password to validate
+
+    Returns:
+        bool: True when password meets complexity requirements
+    """
+    has_upper = any(char.isupper() for char in password)
+    has_lower = any(char.islower() for char in password)
+    has_digit = any(char.isdigit() for char in password)
+    has_special = any(char in string.punctuation for char in password)
+    has_min_length = len(password) >= MIN_PASSWORD_LENGTH
+    return has_min_length and has_upper and has_lower and has_digit and has_special
+
+
+def has_sufficient_key_entropy(value):
+    """
+    Basic entropy checks for shared API key quality.
+
+    Args:
+        value (str): API key value
+
+    Returns:
+        bool: True when key has enough character variety
+    """
+    if not value:
+        return False
+    if len(set(value)) < MIN_API_KEY_UNIQUE_CHARS:
+        return False
+    has_upper = any(char.isupper() for char in value)
+    has_lower = any(char.islower() for char in value)
+    has_digit = any(char.isdigit() for char in value)
+    has_special = any(char in string.punctuation for char in value)
+    if sum([has_upper, has_lower, has_digit, has_special]) < 3:
+        return False
+    return True
 
 
 # HTML template to display the log contents and provide a download link
@@ -210,8 +272,14 @@ def receive_log():
         Success or error message
     """
     try:
+        if not has_valid_api_key():
+            return "Unauthorized", 401
+
         log_data = request.form.get('log', '')
         if log_data:
+            if len(log_data.encode('utf-8')) > MAX_LOG_PAYLOAD_BYTES:
+                return "Log payload too large", 413
+
             log_file_path = CONFIG['log_file_path']
             
             # Ensure log directory exists
@@ -220,7 +288,7 @@ def receive_log():
                 os.makedirs(log_dir, exist_ok=True)
             
             # Append log data to file
-            with open(log_file_path, 'a') as f:
+            with open(log_file_path, 'a', encoding='utf-8') as f:
                 f.write(log_data)
             
             return "Log received successfully", 200
@@ -297,6 +365,7 @@ def main():
     # Load credentials from environment variables
     CONFIG['username'] = os.getenv('WEB_SERVER_USERNAME')
     CONFIG['password'] = os.getenv('WEB_SERVER_PASSWORD')
+    CONFIG['api_key'] = os.getenv('LOG_INGEST_API_KEY')
     
     # Validate that credentials are set
     if not CONFIG['username'] or not CONFIG['password']:
@@ -308,15 +377,36 @@ def main():
         print("\nOr source your .env file:")
         print("  source config/.env")
         sys.exit(1)
-    
-    if CONFIG['password'] == 'admin' or len(CONFIG['password']) < 8:
-        print("⚠️  WARNING: Weak password detected!")
-        print("   Please use a strong password (at least 8 characters).")
+
+    if CONFIG['password'] == 'admin':
+        sys.exit("ERROR: Authentication secret uses a disallowed default value.")
+
+    if not is_strong_password(CONFIG['password']):
+        sys.exit(
+            "ERROR: Authentication secret must be at least 12 characters and include uppercase, "
+            "lowercase, number, and special character."
+        )
+
+    if not CONFIG['api_key']:
+        sys.exit("ERROR: Ingestion API secret is required.")
+
+    if len(CONFIG['api_key']) < MIN_API_KEY_LENGTH:
+        sys.exit(f"ERROR: Ingestion API secret must be at least {MIN_API_KEY_LENGTH} characters.")
+
+    if not has_sufficient_key_entropy(CONFIG['api_key']):
+        sys.exit(
+            f"ERROR: Ingestion API secret must contain at least {MIN_API_KEY_UNIQUE_CHARS} unique characters."
+        )
     
     # Get server settings
     host = args.host or server_config.get('host', '0.0.0.0')
     port = args.port or server_config.get('port', 5000)
     debug = args.debug or server_config.get('debug', False)
+
+    if debug and host not in ('127.0.0.1', 'localhost', '::1'):
+        print("ERROR: Debug mode is only allowed on localhost interfaces.")
+        print("Use a local host binding or disable --debug.")
+        sys.exit(1)
 
     print(f"\nStarting web server on {host}:{port}")
     print(f"Log file path: {CONFIG['log_file_path']}")
