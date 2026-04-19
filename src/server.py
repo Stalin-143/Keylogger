@@ -25,12 +25,6 @@ BANNER = r"""
 Github: https://github.com/Stalin-143
 """
 
-app = Flask(__name__)
-
-# Set a secure secret key for session management
-app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
-
-# Global configuration
 CONFIG = {
     'log_file_path': 'logs/keylog.txt',
     'username': 'admin',
@@ -41,6 +35,12 @@ MAX_LOG_PAYLOAD_BYTES = 64 * 1024
 MIN_PASSWORD_LENGTH = 12
 MIN_API_KEY_LENGTH = 24
 MIN_API_KEY_UNIQUE_CHARS = 8
+
+app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = MAX_LOG_PAYLOAD_BYTES
+
+# Set a secure secret key for session management
+app.secret_key = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
 
 
 def check_auth(username, password):
@@ -134,6 +134,12 @@ def has_sufficient_key_entropy(value):
     if not value:
         return False
     if len(set(value)) < MIN_API_KEY_UNIQUE_CHARS:
+        return False
+    has_upper = any(char.isupper() for char in value)
+    has_lower = any(char.islower() for char in value)
+    has_digit = any(char.isdigit() for char in value)
+    has_special = any(char in string.punctuation for char in value)
+    if sum([has_upper, has_lower, has_digit, has_special]) < 3:
         return False
     return True
 
