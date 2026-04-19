@@ -134,8 +134,6 @@ def has_sufficient_key_entropy(value):
         return False
     if len(set(value)) < MIN_API_KEY_UNIQUE_CHARS:
         return False
-    if value.count(value[0]) == len(value):
-        return False
     return True
 
 
@@ -374,28 +372,19 @@ def main():
         sys.exit(1)
 
     if CONFIG['password'] == 'admin':
-        print("ERROR: Default password 'admin' is not allowed.")
-        sys.exit(1)
+        sys.exit("ERROR: Authentication secret uses a disallowed default value.")
 
     if len(CONFIG['password']) < MIN_PASSWORD_LENGTH or not is_strong_password(CONFIG['password']):
-        print("ERROR: Weak password detected.")
-        print(
-            f"Please use at least {MIN_PASSWORD_LENGTH} characters with uppercase, lowercase, "
-            "number, and special character."
-        )
-        sys.exit(1)
+        sys.exit("ERROR: Authentication secret does not meet complexity policy.")
 
     if not CONFIG['api_key']:
-        print("ERROR: LOG_INGEST_API_KEY is required.")
-        sys.exit(1)
+        sys.exit("ERROR: Ingestion API secret is required.")
 
     if len(CONFIG['api_key']) < MIN_API_KEY_LENGTH:
-        print(f"ERROR: LOG_INGEST_API_KEY must be at least {MIN_API_KEY_LENGTH} characters.")
-        sys.exit(1)
+        sys.exit("ERROR: Ingestion API secret does not meet length policy.")
 
     if not has_sufficient_key_entropy(CONFIG['api_key']):
-        print(f"ERROR: Ingestion API key must include at least {MIN_API_KEY_UNIQUE_CHARS} unique characters.")
-        sys.exit(1)
+        sys.exit("ERROR: Ingestion API secret does not meet entropy policy.")
     
     # Get server settings
     host = args.host or server_config.get('host', '0.0.0.0')

