@@ -228,11 +228,11 @@ def main():
         sys.exit(1)
 
     if not api_key:
-        print("Error: LOG_INGEST_API_KEY environment variable is required.")
+        print("ERROR: LOG_INGEST_API_KEY environment variable is required.")
         sys.exit(1)
 
     if len(api_key) < 24:
-        print("Error: LOG_INGEST_API_KEY must be at least 24 characters.")
+        print("ERROR: LOG_INGEST_API_KEY must be at least 24 characters.")
         sys.exit(1)
     
     if args.no_verify_ssl:

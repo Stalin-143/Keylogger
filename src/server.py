@@ -9,6 +9,7 @@ import sys
 import json
 import secrets
 import argparse
+import string
 from functools import wraps
 from flask import Flask, render_template_string, send_file, request, Response
 
@@ -97,6 +98,40 @@ def has_valid_api_key():
     if not configured_api_key or not request_api_key:
         return False
     return secrets.compare_digest(request_api_key, configured_api_key)
+
+
+def is_strong_password(password):
+    """
+    Validate password complexity requirements.
+
+    Args:
+        password (str): Password to validate
+
+    Returns:
+        bool: True when password meets complexity requirements
+    """
+    has_upper = any(char.isupper() for char in password)
+    has_lower = any(char.islower() for char in password)
+    has_digit = any(char.isdigit() for char in password)
+    has_special = any(char in string.punctuation for char in password)
+    return has_upper and has_lower and has_digit and has_special
+
+
+def has_sufficient_key_entropy(value):
+    """
+    Basic entropy checks for shared API key quality.
+
+    Args:
+        value (str): API key value
+
+    Returns:
+        bool: True when key has enough character variety
+    """
+    if len(set(value)) < 8:
+        return False
+    if value.count(value[0]) == len(value):
+        return False
+    return True
 
 
 # HTML template to display the log contents and provide a download link
@@ -333,13 +368,13 @@ def main():
         print("  source config/.env")
         sys.exit(1)
 
-    if CONFIG['password'] == 'admin' or len(CONFIG['password']) < 12:
+    if CONFIG['password'] == 'admin' or len(CONFIG['password']) < 12 or not is_strong_password(CONFIG['password']):
         print("ERROR: Weak password detected.")
-        print("Please use a strong password (at least 12 characters).")
+        print("Please use at least 12 characters with uppercase, lowercase, number, and special character.")
         sys.exit(1)
 
-    if not CONFIG['api_key'] or len(CONFIG['api_key']) < 24:
-        print("ERROR: LOG_INGEST_API_KEY is required and must be at least 24 characters.")
+    if not CONFIG['api_key'] or len(CONFIG['api_key']) < 24 or not has_sufficient_key_entropy(CONFIG['api_key']):
+        print("ERROR: LOG_INGEST_API_KEY is required, must be at least 24 characters, and must have sufficient entropy.")
         sys.exit(1)
     
     # Get server settings
