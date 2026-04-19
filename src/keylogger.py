@@ -230,12 +230,10 @@ def main():
         sys.exit(1)
 
     if not api_key:
-        print("ERROR: LOG_INGEST_API_KEY environment variable is required.")
-        sys.exit(1)
+        sys.exit("ERROR: Ingestion API secret is required.")
 
     if len(api_key) < MIN_API_KEY_LENGTH:
-        print(f"ERROR: LOG_INGEST_API_KEY must be at least {MIN_API_KEY_LENGTH} characters.")
-        sys.exit(1)
+        sys.exit(f"ERROR: Ingestion API secret must be at least {MIN_API_KEY_LENGTH} characters.")
     
     if args.no_verify_ssl:
         print("⚠️  WARNING: SSL certificate verification is DISABLED!")
