@@ -22,8 +22,8 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "torvalds"
+          git config user.email "torvalds@linux-foundation.org"
           git add README.md
           git commit -m "chore: increment counter to $(grep -oP '(?<=Counter: )\d+' README.md)"
           git push
