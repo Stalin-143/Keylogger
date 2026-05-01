@@ -1,0 +1,29 @@
+name: Auto Increment Counter
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  increment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Increment counter in README
+        run: |
+          current=$(grep -oP '(?<=Counter: )\d+' README.md)
+          new=$((current + 2))
+          sed -i "s/Counter: ${current}/Counter: ${new}/" README.md
+          echo "Counter updated from ${current} to ${new}"
+
+      - name: Commit and push
+        run: |
+          git config user.name "torvalds"
+          git config user.email "torvalds@linux-foundation.org"
+          git add README.md
+          git commit -m "chore: increment counter to $(grep -oP '(?<=Counter: )\d+' README.md)"
+          git push
