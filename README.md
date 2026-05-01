@@ -1,7 +1,7 @@
 # Keylogger :)
 
 <!-- COUNTER -->
-Counter: 1
+Counter: 3
 <!-- /COUNTER -->
 
 [![Contributors](https://img.shields.io/github/contributors/Stalin-143/Keylogger?style=for-the-badge)](https://github.com/Stalin-143/Keylogger/graphs/contributors)
