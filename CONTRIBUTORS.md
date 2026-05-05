@@ -8,8 +8,8 @@ Thank you to everyone who has contributed to this project! 🎉
 <table>
 <tr>
     <td align="center">
-        <a href="https://github.com/Stalin-143">
-            <img src="https://avatars.githubusercontent.com/u/161853795?v=4" width="100;" alt="Stalin-143"/>
+        <a href="https://github.com/0x5t4l1n">
+            <img src="https://avatars.githubusercontent.com/u/161853795?v=4" width="100;" alt="0x5t4l1n"/>
             <br />
             <sub><b>Stalin</b></sub>
         </a>
@@ -26,6 +26,13 @@ Thank you to everyone who has contributed to this project! 🎉
             <img src="https://avatars.githubusercontent.com/u/185629164?v=4" width="100;" alt="HARSHITHA-SREE"/>
             <br />
             <sub><b>HARSHITHA-SREE</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/torvalds">
+            <img src="https://avatars.githubusercontent.com/u/1024025?v=4" width="100;" alt="torvalds"/>
+            <br />
+            <sub><b>Linus Torvalds</b></sub>
         </a>
     </td></tr>
 </table>
