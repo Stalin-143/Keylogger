@@ -1,21 +1,29 @@
-# Security Policy
+## Security Policy
 
-## Supported Versions
+### Reporting Vulnerabilities
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+If you discover any security vulnerabilities, please report them responsibly.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+Send detailed vulnerability reports to:
 
-## Reporting a Vulnerability
+Email: w4nn4d133@gmail.com
 
-Use this section to tell people how to report a vulnerability.
+OpenPGP Fingerprint:
+`DEBE5591C54E947279C14A6BF53D272DA9ADAF98`
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Public Key:
+https://keys.openpgp.org/vks/v1/by-fingerprint/DEBE5591C54E947279C14A6BF53D272DA9ADAF98
+
+Alternatively, you may submit your report through our official advisory channel (if available).
+
+### Guidelines for Reporting
+
+Please include:
+
+- A clear description of the vulnerability
+- Steps to reproduce the issue
+- Proof-of-Concept (PoC), if possible
+- The potential security impact
+- Affected versions/components
+
+We appreciate responsible disclosure and will work to validate and address legitimate security issues promptly.
