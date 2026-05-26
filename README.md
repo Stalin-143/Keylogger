@@ -1,8 +1,9 @@
 # Keylogger :)
 
-<!-- COUNTER -->
-Counter: 3
-<!-- /COUNTER -->
+[![Self-Hosted Git](https://img.shields.io/badge/Self--Hosted-Gitea-green?style=flat-square\&logo=gitea\&logoColor=white)](https://git.w4nn4d13.tech/0x5t4l1n/Keylogger)
+
+
+
 
 [![Contributors](https://img.shields.io/github/contributors/Stalin-143/Keylogger?style=for-the-badge)](https://github.com/Stalin-143/Keylogger/graphs/contributors)
 
